@@ -17,7 +17,25 @@ import Path from'path';
 const bucket = storage.bucket('xdetect-profile-picture');
 
 // Handler signup
-
+export const signUp = async(req, res) => {
+    const { name, email, phone, password } = req.body;
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        const userDoc = doc(db, 'users', user.uid);
+        await setDoc(userDoc, {
+            name,
+            email,
+            phone,
+        });
+        res.status(200).json({success:true, msg:'Berhasil SignUp, silakan SignIn'});
+    } catch (error) {
+        console.log('Error melakukan sign up:', error);
+        if (error.code === 'auth/email-already-in-use') {
+            res.status(400).json({success:false, msg:'Email sudah terdaftar'});
+        }
+    }
+}
 
 // Handler signin
 
