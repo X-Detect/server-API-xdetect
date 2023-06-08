@@ -127,6 +127,17 @@ export const uploadProfilePicture = async (req, res) => {
 
 
 // Handler reset password
+export const resetPassword = async(req, res) => {
+    const { email } = req.body;
+    try {
+        await sendPasswordResetEmail(auth, email);
+        console.log('Link reset email telah dikirimkan ke:', email);
+        return res.status(200).json({msg: "Link Reset Password Telah Dikirim Ke Email"});
+    } catch (error) {
+        return res.status(200).json({msg: "Error melakukan reset password"});
+    }
+}
+
 
 // Handler signout
 export const signOutUser = async(req, res) => {
