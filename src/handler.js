@@ -38,6 +38,19 @@ export const signUp = async(req, res) => {
 }
 
 // Handler signin
+export const signIn = async(req, res) => {
+    const { email, password } = req.body;
+    try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        res.json({ success: true, msg:'Berhasil Sign In', data: {
+            uid: user.uid, 
+            email: user.email
+        } });
+    } catch (error) {
+        res.status(404).json({succes: false, msg:'Error melakukan Sign In'});
+    }
+}
 
 // Handler upload profile picture
 
