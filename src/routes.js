@@ -1,7 +1,7 @@
-const Joi = require('joi');
-const { } = require('../src/handler');
+import  express from "express";
+
+const router = express.Router();
 
 
-module.exports = {
-    
-}
+
+export default router;

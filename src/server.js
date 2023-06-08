@@ -1,13 +1,12 @@
-const express = require('express');
-const routes = require('./routes');
-require('dotenv').config();
+import  express  from "express";
+import dotenv from "dotenv";
+import router from "./routes.js";
 
 const app = express();
 const port = 8080;
 
 app.use(express.json({ limit: '10mb' }));
-
-// app.use(routes);
+app.use(router);
 
 app.get('/', (req, res) => {
   res.send('Hello World!');

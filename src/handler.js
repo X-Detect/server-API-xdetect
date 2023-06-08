@@ -1,21 +1,23 @@
-const { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateEmail, updatePassword } = require('firebase/auth');
-const { doc, setDoc, getDoc, updateDoc } = require('firebase/firestore');
-const { getDownloadURL, ref, uploadBytes } = require('firebase/storage');
-const { auth, db } = require('../db-config/firebase-config');
-const { sendPasswordResetEmail } = require('firebase/auth');
-const { Storage } = require('@google-cloud/storage');
-require('dotenv').config();
+import {createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateEmail, updatePassword} from "firebase/auth";
+import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import { db, auth } from "../db-config/firebase-config.js";
+import { sendPasswordResetEmail } from 'firebase/auth';
+import { Storage } from '@google-cloud/storage';
+import dotenv from "dotenv";
+dotenv.config();
 
 const storage = new Storage({
   projectId: process.env.GOOGLE_CLOUD_PROJECT,
   keyFilename: "../db-config/serviceAccount.json",
 });
 
-const fs = require('fs');
-const Path = require('path');
+import fs from 'fs';
+import Path from'path';
 const bucket = storage.bucket('xdetect-profile-picture');
 
 // Handler signup
+
 
 // Handler signin
 
@@ -30,7 +32,3 @@ const bucket = storage.bucket('xdetect-profile-picture');
 // Handler /user/{uid}
 
 // Handler prediksi
-
-module.exports = {
-
-};
