@@ -13,9 +13,6 @@ const storage = new Storage({
     keyFilename: "./db-config/serviceAccount.json",
 });
 
-import fs from 'fs';
-import path from'path';
-
 // Bucket untuk menyimpan image 
 const bucket = storage.bucket('xdetect-upload-image');
 
@@ -55,78 +52,51 @@ export const signIn = async(req, res) => {
     }
 }
 
-// Handler upload profile picture
-export const uploadProfilePicture = async (req, res) => {
+// Fungsi untuk mengunggah file gambar ke Google Cloud Storage
+export const uploadProfilePicture = async(req, res) => {
     try {
-        if (!req.files || !req.files.file) {
-        return res.status(400).json({
-            success: false,
-            msg: "Tidak ada file yang ditambahkan",
+      if (!req.file) {
+        res.status(400).send('No file uploaded.');
+        return;
+      }
+  
+      const imageFile = req.file;
+      const bucket = storage.bucket('xdetect-img-profile');
+      const fileName = Date.now() + '_' + imageFile.originalname;
+      const fileUpload = bucket.file(fileName);
+  
+      const stream = fileUpload.createWriteStream({
+        metadata: {
+          contentType: imageFile.mimetype,
+        },
+      });
+  
+      stream.on('error', (error) => {
+        console.error('Error uploading file:', error);
+        res.status(500).send('Internal Server Error');
+      });
+  
+      stream.on('finish', async () => {
+        // Dapatkan URL publik file yang diunggah
+        const [url] = await fileUpload.getSignedUrl({
+          action: 'read',
+          expires: '01-01-2025', // Tanggal kadaluarsa URL publik
         });
-        }
-
-        const { uid } = req.params;
-        const file = req.files.file;
-        const fileName = file.name;
-        const filePath = path.join(__dirname, "../", "uploads", fileName);
-
-        // Move the uploaded file to the server
-        file.mv(filePath, async (err) => {
-        if (err) {
-            console.error("Error moving file:", err);
-            return res.status(500).json({
-            success: false,
-            msg: "Terjadi error saat mengunggah gambar profil",
-            });
-        }
-
-        // Upload the file to Firebase Storage
-        const blob = bucket.file(fileName);
-        const [exists] = await blob.exists();
-        if (exists) {
-            await blob.delete();
-        }
-
-        const blobStream = blob.createWriteStream();
-
-        blobStream.on("error", (err) => {
-            console.error("Error uploading profile picture:", err);
-            return res.status(500).json({
-            success: false,
-            msg: "Terjadi error saat mengunggah gambar profil",
-            });
+  
+        res.status(200).json({
+          status: 'Success',
+          message: 'Profile picture berhasil ditambahkan',
+          fileName,
+          url,
         });
-
-        blobStream.on("finish", async () => {
-            // Get the public URL of the uploaded file
-            const publicUrl = await blob.getSignedUrl({
-            action: "read",
-            expires: "03-01-2500", // Set an expiration date
-            });
-
-            // Update the user document with the image URL
-            const userDoc = doc(db, "users", uid);
-            await updateDoc(userDoc, { imgUrl: publicUrl });
-
-            // Remove the temporary file from the server
-            fs.unlinkSync(filePath);
-
-            return res.status(200).json({
-            success: true,
-            msg: "Gambar profil berhasil ditambahkan",
-            });
-        });
-
-        fs.createReadStream(filePath).pipe(blobStream);
-        });
+      });
+  
+      stream.end(imageFile.buffer);
     } catch (error) {
-        console.error("Internal server error:", error);
-        return res.status(500).json({
-        success: false,
-        msg: "An internal server error occurred",
-        });
+      console.error('Error uploading file:', error);
+      res.status(500).send('Internal Server Error');
     }
-};
+  }
 
 
 // Handler reset password
