@@ -1,6 +1,6 @@
 # Server X-Detect Capstone C23-PC603
 
-### Team Member
+## Team Member
 
 **(ML) M121DKX4633** – Dzaky Abdillah Salafy – UIN Sultan Syarif Kasim Riau
 
@@ -14,243 +14,169 @@
 
 **(MD) A304DSY1205** – Zainatul Sirti – Universitas Pembangunan Nasional Veteran Jakarta
 
-# ENDPOINTS
+# API Documentation
 
-| Method | Endpoint      |
-| ------ | ------------- |
-| GET    | /Users        |
-| POST   | /Signup       |
-| POST   | /Signin       |
-| DELETE | /Signout      |
-| PATCH  | /Profile      |
-| POST   | /upload       |
-| GET    | /History      |
-| GET    | /History/{id} |
+This document provides information on how to use the API endpoints and their functionalities.
 
-<hr>
+## Endpoints
 
-## <b>GET /Users </b>
+### POST /Signup
 
-Mendapatkan semua data user
+Create a new user account.
 
-Request body: tidak ada
+#### Request
 
-Response :
-Array user objects
-
-<hr>
-
-## <b>POST /Signup </b>
-
-Melakukan pendaftaran ke aplikasi
-
-Request body:
-
+- Method: POST
+- Path: /Signup
+- Body Parameters:
 ```json
-{
-  "name": "nama_user",
-  "email": "email_user",
-  "phone": "nomor_telepon_user",
-  "password": "password_user"
-}
-```
-
-Response jika sign-up berhasil:
-
-```json
-{
-  "success": true,
-  "msg": "Berhasil SignUp, silakan SignIn"
-}
-```
-
-Response jika username sudah digunakan:
-
-```json
-{
-  "success": false,
-  "msg": "Username sudah digunakan"
-}
-```
-
-## <b>POST /Signin </b>
-
-Dilakukan untuk login ke aplikasi dan melakukan autentikasi
-
-Request body:
-
-```json
-{
-  "name": "nama_user",
-  "password": "password_user"
-}
-```
-
-Response jika sign-in berhasil:
-
-```json
-{
-  "success": true,
-  "msg": "Berhasil Login",
-  "data": {
-    "userId": "id_user",
-    "name": "nama_user",
-    "phone": "nomor_telepon_user",
-    "email": "email_user",
-    "image_url": "url_gambar",
-    "accessToken": "access_token"
+  {
+    "name": "John Doe",
+    "email": "johndoe@example.com",
+    "phone": "1234567890",
+    "password": "password123"
   }
-}
 ```
 
-Response jika password salah:
+#### Response
 
+- Success (HTTP 200):
+  - success (boolean): `true`
+  - msg (string): "Berhasil SignUp, silakan SignIn"
+
+- Failure (HTTP 400):
+  - success (boolean): `false`
+  - msg (string): "Email sudah terdaftar"
+
+### POST /Signin
+
+Authenticate and sign in a user.
+
+#### Request
+
+- Method: POST
+- Path: /Signin
+- Body Parameters:
 ```json
 {
-  "success": false,
-  "msg": "Password Anda Salah"
+  "email": "johndoe@example.com",
+  "password": "password123"
 }
 ```
 
-Response jika username tidak ditemukan:
+#### Response
 
+- Success (HTTP 200):
+  - success (boolean): `true`
+  - msg (string): "Berhasil Sign In"
+  - data (object):
+    - uid (string): User's unique ID.
+    - email (string): User's email address.
+
+- Failure (HTTP 404):
+  - success (boolean): `false`
+  - msg (string): "Error melakukan Sign In"
+
+### POST /Resetpassword
+
+Send a password reset email to the user.
+
+#### Request
+
+- Method: POST
+- Path: /Resetpassword
+- Body Parameters:
 ```json
 {
-  "success": false,
-  "msg": "Username Tidak Ditemukan"
+  "email": "johndoe@example.com"
 }
+
 ```
 
-<hr>
+#### Response
 
-## <b>DELETE /Signout <b>
+- Success (HTTP 200):
+  - msg (string): "Link Reset Password Telah Dikirim Ke Email"
 
-User melakukan logout dari aplikasi
+- Failure (HTTP 200):
+  - msg (string): "Error melakukan reset password"
 
-Request Body: Tidak memerlukan request body.
+### POST /Signout
 
-Response jika sign-out berhasil:
+Sign out the currently authenticated user.
 
-```json
-{
-  "msg": "Sign out berhasil"
-}
-```
+#### Request
 
-## <b>PATCH /Profile <b>
+- Method: POST
+- Path: /Signout
 
-Untuk melakukan perubahan terhadap profile akun pengguna aplikasi
+#### Response
 
-Request Body:
+- Success (HTTP 200):
+  - msg (string): "Sign out Berhasil"
 
-```json
-{
-  "name": "nama_user",
-  "email": "email_user",
-  "phone": "nomor_telepon_user",
-  "password": "password_user"
-}
-```
+- Failure (HTTP 500):
+  - msg (string): "Gagal Melakukan Sign Out"
 
-Response jika profile berhasil diupdate:
+### POST /Predict
 
-```json
-{
-  "success": true,
-  "msg": "Profile Berhasil Diupdate"
-}
-```
+Upload an image file for prediction.
 
-Response jika access token tidak ada:
+#### Request
 
-```json
-{
-  "msg": "Access token tidak ada"
-}
-```
+- Method: POST
+- Path: /Predict
+- Body Parameters:
+  - image (file): Image file to be uploaded.
 
-Response jika access token tidak ada:
+#### Response
 
-```json
-{
-  "msg": "User tidak ditemukan"
-}
-```
+- Success (HTTP 200):
+  - status (string): "Success"
+  - message (string): "Profile picture berhasil ditambahkan"
+  - fileName (string): Name of the uploaded file.
+  - url (string): Public URL of the uploaded file.
+  - file (file): JSON file containing additional information.
 
-## <b>POST /upload <b>
+### POST /upload-profile-picture
 
-Untuk melakukan perubahan terhadap profile akun pengguna aplikasi
+Upload a profile picture image file.
 
-Request Body: Multipart form data dengan field image yang berisi file gambar.
+#### Request
 
-```json
-{
-  "image": "example.jpg"
-}
-```
+- Method: POST
+- Path: /upload-profile-picture
+- Body Parameters:
+  - image (file): Image file to be uploaded.
 
-Response jika berhasil: akan mengupload gambar dan menjalankan deteksi penyakit kemudian mengembalikan Array of history objects.
+#### Response
 
-Response jika tidak ada gambar yang diupload:
+- Success (HTTP 200):
+  - status (string): "Success"
+  - message (string): "Profile picture berhasil ditambahkan"
+  - fileName (string): Name of the uploaded file.
+  - url (string): Public URL of the uploaded file.
+  - file (file): JSON file containing additional information.
 
-```json
-{
-  "msg": "Tidak Ada Gambar"
-}
-```
+### POST /upload/:uid
 
-Response jika terjadi error saat mengunggah gambar:
+Upload a profile picture image file for a specific user.
 
-```json
-{
-  "msg": "Error uploading image: error_message"
-}
-```
+#### Request
 
-Response jika terjadi kesalahan menambahkan data history:
+- Method: POST
+- Path: /upload/:uid
+- Body Parameters:
+  - image (file): Image file to be uploaded.
+- Route Parameters:
+  - uid (string): User's unique ID.
 
-```json
-{
-  "msg": "Error adding history data: error_message"
-}
-```
+#### Response
 
-Response jika Berhasil melakukan upload dan deteksi:
+- Success (HTTP 200):
+  - status (string): "Success"
+  - message (string): "Profile picture berhasil ditambahkan"
+  - fileName (string): Name of the uploaded file.
+  - url (string): Public URL of the uploaded file.
+  - file (file): JSON file containing additional information.
 
-```json
-{
-  "msg": "Masih Dikembangkan"
-}
-```
-
-## <b>GET /History <b>
-
-Mendapatkan semua data history deteksi berdasarkan userId
-
-Response jika terdapat data history
-
-```json
-{
-  "id": 1,
-  "id_user": 1,
-  "image_url": "https://example.com",
-  "title": "lore ipsum",
-  "response": "lorem"
-}
-```
-
-## <b>GET /History/{id} <b>
-
-Mendapatkan detail data history deteksi berdasarkan userId dan historyId
-
-Response jika terdapat data history
-
-```json
-{
-  "id": 1,
-  "id_user": 1,
-  "image_url": "https://example.com",
-  "title": "lore ipsum",
-  "response": "lorem"
-}
-```
