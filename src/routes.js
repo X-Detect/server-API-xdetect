@@ -10,7 +10,7 @@ router.post('/Signup', signUp)
 router.post('/Signin', signIn)
 router.post('/Resetpassword', resetPassword)
 router.post('/Signout', signOutUser)
-router.post('/Predict', upload.single('file'), predict)
+router.post('/Predict', upload.single('image'), predict)
 router.post('/upload-profile-picture', upload.single('image'), uploadProfilePicture);
 
 

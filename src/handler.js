@@ -13,9 +13,6 @@ const storage = new Storage({
     keyFilename: "./db-config/serviceAccount.json",
 });
 
-// Bucket untuk menyimpan image 
-const bucket = storage.bucket('xdetect-upload-image');
-
 // Handler signup
 export const signUp = async(req, res) => {
     const { name, email, phone, password } = req.body;
@@ -55,48 +52,45 @@ export const signIn = async(req, res) => {
 // Fungsi untuk mengunggah file gambar ke Google Cloud Storage
 export const uploadProfilePicture = async(req, res) => {
     try {
-      if (!req.file) {
-        res.status(400).send('No file uploaded.');
-        return;
-      }
-  
-      const imageFile = req.file;
-      const bucket = storage.bucket('xdetect-img-profile');
-      const fileName = Date.now() + '_' + imageFile.originalname;
-      const fileUpload = bucket.file(fileName);
-  
-      const stream = fileUpload.createWriteStream({
+        if (!req.file) { res.status(400).send('No file uploaded.'); return; }
+
+    const imageFile = req.file;
+    const bucket = storage.bucket('xdetect-img-profile');
+    const fileName = Date.now() + '_' + imageFile.originalname;
+    const fileUpload = bucket.file(fileName);
+
+    const stream = fileUpload.createWriteStream({
         metadata: {
-          contentType: imageFile.mimetype,
+        contentType: imageFile.mimetype,
         },
-      });
-  
-      stream.on('error', (error) => {
+    });
+
+    stream.on('error', (error) => {
         console.error('Error uploading file:', error);
         res.status(500).send('Internal Server Error');
-      });
-  
-      stream.on('finish', async () => {
-        // Dapatkan URL publik file yang diunggah
-        const [url] = await fileUpload.getSignedUrl({
-          action: 'read',
-          expires: '01-01-2025', // Tanggal kadaluarsa URL publik
+    });
+
+    stream.on('finish', async () => {
+    // Dapatkan URL publik file yang diunggah
+    const [url] = await fileUpload.getSignedUrl({
+        action: 'read',
+        expires: '01-01-2025', // Tanggal kadaluarsa URL publik
+    });
+
+    res.status(200).json({
+        status: 'Success',
+        message: 'Profile picture berhasil ditambahkan',
+        fileName,
+        url,
         });
-  
-        res.status(200).json({
-          status: 'Success',
-          message: 'Profile picture berhasil ditambahkan',
-          fileName,
-          url,
-        });
-      });
-  
-      stream.end(imageFile.buffer);
+    });
+
+    stream.end(imageFile.buffer);
     } catch (error) {
-      console.error('Error uploading file:', error);
-      res.status(500).send('Internal Server Error');
+        console.error('Error uploading file:', error);
+        res.status(500).send('Internal Server Error');
     }
-  }
+}
 
 
 // Handler reset password
@@ -130,48 +124,42 @@ export const signOutUser = async(req, res) => {
 // Handler prediksi
 export const predict = async(req, res) => {
     try {
-    
-    if (!req.file) {
-        return res.status(400).send({ message: "Please upload a file!" });
-    }
-    
-    // Create a new blob in the bucket and upload the file data.
-    const blob = await bucket.file(req.file.originalname);
-    const blobStream = await blob.createWriteStream({
-        resumable: false,
+        if (!req.file) { res.status(400).send('No file uploaded.'); return; }
+
+    const imageFile = req.file;
+    const bucket = storage.bucket('xdetect-upload-image');
+    const fileName = Date.now() + '_' + imageFile.originalname;
+    const fileUpload = bucket.file(fileName);
+
+    const stream = fileUpload.createWriteStream({
+        metadata: {
+        contentType: imageFile.mimetype,
+        },
     });
-    
-    blobStream.on("error", (err) => {
-        res.status(500).send({ message: err.message });
+
+    stream.on('error', (error) => {
+        console.error('Error uploading file:', error);
+        res.status(500).send('Internal Server Error');
     });
-    
-    blobStream.on("finish", async (data) => {
-        // Create URL for directly file access via HTTP.
-        const publicUrl = format(
-            `https://storage.googleapis.com/${bucket.name}/${blob.name}`
-        );
-    
-    try {
-        // Make the file public
-        await bucket.file(req.file.originalname).makePublic();
-        } catch {
-            return res.status(500).send({
-            message:
-                `Uploaded the file successfully: ${req.file.originalname}, but public access is denied!`,
-            url: publicUrl,
-        });
-        }
-    
-        res.status(200).send({
-            message: "Uploaded the file successfully: " + req.file.originalname,
-            url: publicUrl,
-        });
-        });
-    
-        blobStream.end(req.file.buffer);
-    } catch (err) {
-        res.status(500).send({
-        message: `Could not upload the file: ${req.file.originalname}. ${err}`,
+
+    stream.on('finish', async () => {
+    // Dapatkan URL publik file yang diunggah
+    const [url] = await fileUpload.getSignedUrl({
+        action: 'read',
+        expires: '01-01-2025', // Tanggal kadaluarsa URL publik
     });
+
+    res.status(200).json({
+        status: 'Success',
+        message: 'Profile picture berhasil ditambahkan',
+        fileName,
+        url,
+        });
+    });
+
+    stream.end(imageFile.buffer);
+    } catch (error) {
+        console.error('Error uploading file:', error);
+        res.status(500).send('Internal Server Error');
     }
 }
