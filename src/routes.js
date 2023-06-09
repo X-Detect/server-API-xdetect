@@ -1,6 +1,6 @@
 import  express from "express";
 import multer from "multer";
-import { resetPassword, signIn, signOutUser, signUp, uploadProfilePicture } from "./handler.js";
+import { resetPassword, signIn, signOutUser, signUp, uploadProfilePicture, uploadProfilePictureWithUID } from "./handler.js";
 
 const router = express.Router();
 const multerStorage = multer.memoryStorage();
@@ -11,6 +11,7 @@ router.post('/Signin', signIn)
 router.post('/Resetpassword', resetPassword)
 router.post('/Signout', signOutUser)
 router.post('/upload-profile-picture', upload.single('image'), uploadProfilePicture);
+router.post('/upload/:uid', upload.single('image'), uploadProfilePictureWithUID);
 
 
 

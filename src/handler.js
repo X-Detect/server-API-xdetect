@@ -9,8 +9,8 @@ dotenv.config();
 
 const storage = new Storage({
     projectId: process.env.GOOGLE_CLOUD_PROJECT,
-    // keyFilename: "../db-config/serviceAccount.json",
-    keyFilename: "db-config/serviceAccount.json",
+    keyFilename: "../db-config/serviceAccount.json",
+    // keyFilename: "db-config/serviceAccount.json",
 });
 
 // Handler signup
@@ -24,6 +24,7 @@ export const signUp = async(req, res) => {
             name,
             email,
             phone,
+            // imgUrl: '',
         });
         res.status(200).json({success:true, msg:'Berhasil SignUp, silakan SignIn'});
     } catch (error) {
@@ -93,7 +94,63 @@ export const uploadProfilePicture = async(req, res) => {
       console.error('Error uploading file:', error);
       res.status(500).send('Internal Server Error');
     }
-  }
+}
+
+// Upload PP dengan UID
+export const uploadProfilePictureWithUID = async (req, res) => {
+    try {
+      if (!req.file) {
+        res.status(400).send('No file uploaded.');
+        return;
+      }
+  
+      const { uid } = req.body;
+      const imageFile = req.file;
+      const bucket = storage.bucket('xdetect-img-profile');
+      const fileName = `${uid}_${Date.now()}_${imageFile.originalname}`;
+      const fileUpload = bucket.file(fileName);
+  
+      const stream = fileUpload.createWriteStream({
+        metadata: {
+          contentType: imageFile.mimetype,
+        },
+      });
+  
+      stream.on('error', (error) => {
+        console.error('Error uploading file:', error);
+        res.status(500).send('Internal Server Error');
+      });
+  
+      stream.on('finish', async () => {
+        // Dapatkan URL publik file yang diunggah
+        const [url] = await fileUpload.getSignedUrl({
+          action: 'read',
+          expires: '01-01-2025', // Tanggal kadaluarsa URL publik
+        });
+  
+        // Update URL gambar profil pengguna di database
+        try {
+          const userDoc = doc(db, 'users', uid);
+          await updateDoc(userDoc, { imgUrl: url });
+          console.log('Profile picture URL updated in the database');
+        } catch (error) {
+          console.error('Error updating profile picture URL in the database:', error);
+        }
+  
+        res.status(200).json({
+          status: 'Success',
+          message: 'Profile picture berhasil ditambahkan',
+          fileName,
+          url,
+        });
+      });
+  
+      stream.end(imageFile.buffer);
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      res.status(500).send('Internal Server Error');
+    }
+};
 
 
 // Handler reset password
