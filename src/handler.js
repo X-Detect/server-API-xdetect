@@ -5,13 +5,16 @@ import { db, auth } from "../db-config/firebase-config.js";
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { Storage } from '@google-cloud/storage';
 import dotenv from "dotenv";
+import { format } from "util";
 dotenv.config();
 
 const storage = new Storage({
     projectId: process.env.GOOGLE_CLOUD_PROJECT,
     keyFilename: "../db-config/serviceAccount.json",
-    // keyFilename: "db-config/serviceAccount.json",
 });
+
+// Bucket untuk menyimpan image 
+const bucket = storage.bucket('xdetect-upload-image');
 
 // Handler signup
 export const signUp = async(req, res) => {
@@ -182,3 +185,50 @@ export const signOutUser = async(req, res) => {
 // Handler /user/{uid}
 
 // Handler prediksi
+export const predict = async(req, res) => {
+    try {
+    
+    if (!req.file) {
+        return res.status(400).send({ message: "Please upload a file!" });
+    }
+    
+    // Create a new blob in the bucket and upload the file data.
+    const blob = await bucket.file(req.file.originalname);
+    const blobStream = await blob.createWriteStream({
+        resumable: false,
+    });
+    
+    blobStream.on("error", (err) => {
+        res.status(500).send({ message: err.message });
+    });
+    
+    blobStream.on("finish", async (data) => {
+        // Create URL for directly file access via HTTP.
+        const publicUrl = format(
+            `https://storage.googleapis.com/${bucket.name}/${blob.name}`
+        );
+    
+    try {
+        // Make the file public
+        await bucket.file(req.file.originalname).makePublic();
+        } catch {
+            return res.status(500).send({
+            message:
+                `Uploaded the file successfully: ${req.file.originalname}, but public access is denied!`,
+            url: publicUrl,
+        });
+        }
+    
+        res.status(200).send({
+            message: "Uploaded the file successfully: " + req.file.originalname,
+            url: publicUrl,
+        });
+        });
+    
+        blobStream.end(req.file.buffer);
+    } catch (err) {
+        res.status(500).send({
+        message: `Could not upload the file: ${req.file.originalname}. ${err}`,
+    });
+    }
+}
