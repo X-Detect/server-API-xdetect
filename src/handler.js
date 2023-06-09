@@ -5,12 +5,13 @@ import { db, auth } from "../db-config/firebase-config.js";
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { Storage } from '@google-cloud/storage';
 import dotenv from "dotenv";
+import axios from 'axios';
 import { format } from "util";
 dotenv.config();
 
 const storage = new Storage({
     projectId: process.env.GOOGLE_CLOUD_PROJECT,
-    keyFilename: "../db-config/serviceAccount.json",
+    keyFilename: "db-config/serviceAccount.json",
 });
 
 // Handler signup
@@ -19,12 +20,13 @@ export const signUp = async(req, res) => {
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
-        const userDoc = doc(db, 'users', user.uid);
+        const userDoc = doc(db, 'users2', user.uid);
         await setDoc(userDoc, {
             name,
             email,
             phone,
-            // imgUrl: '',
+            imgUrl: '',
+            profilePicture: '',
         });
         res.status(200).json({success:true, msg:'Berhasil SignUp, silakan SignIn'});
     } catch (error) {
@@ -104,7 +106,7 @@ export const uploadProfilePictureWithUID = async (req, res) => {
       const { uid } = req.body;
       const imageFile = req.file;
       const bucket = storage.bucket('xdetect-img-profile');
-      const fileName = `${uid}_${Date.now()}_${imageFile.originalname}`;
+      const fileName = `${Date.now()}_${imageFile.originalname}`;
       const fileUpload = bucket.file(fileName);
   
       const stream = fileUpload.createWriteStream({
@@ -122,13 +124,13 @@ export const uploadProfilePictureWithUID = async (req, res) => {
         // Dapatkan URL publik file yang diunggah
         const [url] = await fileUpload.getSignedUrl({
           action: 'read',
-          expires: '01-01-2025', // Tanggal kadaluarsa URL publik
+          expires: '01-01-2025',
         });
   
         // Update URL gambar profil pengguna di database
         try {
-          const userDoc = doc(db, 'users', uid);
-          await updateDoc(userDoc, { imgUrl: url });
+          const userDoc = doc(db, 'users2', uid);
+          await updateDoc(userDoc, { imgUrl: url, profilePicture: url });
           console.log('Profile picture URL updated in the database');
         } catch (error) {
           console.error('Error updating profile picture URL in the database:', error);
@@ -179,44 +181,54 @@ export const signOutUser = async(req, res) => {
 // Handler /user/{uid}
 
 // Handler prediksi
-export const predict = async(req, res) => {
-    try {
-        if (!req.file) { res.status(400).send('No file uploaded.'); return; }
+export const predict = async (req, res) => {
+  try {
+    if (!req.file) {
+      res.status(400).send('No file uploaded.');
+      return;
+    }
 
     const imageFile = req.file;
-    const bucket = storage.bucket('xdetect-upload-image');
+    const bucketName = 'xdetect-upload-image';
     const fileName = Date.now() + '_' + imageFile.originalname;
+    const bucket = storage.bucket(bucketName);
     const fileUpload = bucket.file(fileName);
 
     const stream = fileUpload.createWriteStream({
-        metadata: {
+      metadata: {
         contentType: imageFile.mimetype,
-        },
+      },
     });
 
     stream.on('error', (error) => {
-        console.error('Error uploading file:', error);
-        res.status(500).send('Internal Server Error');
+      console.error('Error uploading file:', error);
+      res.status(500).send('Internal Server Error');
     });
 
     stream.on('finish', async () => {
-    // Dapatkan URL publik file yang diunggah
-    const [url] = await fileUpload.getSignedUrl({
+      // Dapatkan URL publik file yang diunggah
+      const [url] = await fileUpload.getSignedUrl({
         action: 'read',
         expires: '01-01-2025', // Tanggal kadaluarsa URL publik
-    });
+      });
 
-    res.status(200).json({
-        status: 'Success',
-        message: 'Profile picture berhasil ditambahkan',
-        fileName,
-        url,
-        });
+      // Panggil endpoint API untuk prediksi
+      const predictionUrl = 'https://xray-prediction-akdfifaocq-et.a.run.app/predict';
+
+      try {
+        const response = await axios.post(predictionUrl, { image: url });
+        const predictionResult = response.data;
+
+        res.status(200).json(predictionResult);
+      } catch (error) {
+        console.error('Error calling prediction API:', error);
+        res.status(500).send('Internal Server Error');
+      }
     });
 
     stream.end(imageFile.buffer);
-    } catch (error) {
-        console.error('Error uploading file:', error);
-        res.status(500).send('Internal Server Error');
-    }
-}
+  } catch (error) {
+    console.error('Error uploading file:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
