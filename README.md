@@ -1,6 +1,6 @@
 # Server X-Detect Capstone C23-PC603
 
-### Team Member
+## Team Member
 
 **(ML) M121DKX4633** – Dzaky Abdillah Salafy – UIN Sultan Syarif Kasim Riau
 
@@ -14,243 +14,281 @@
 
 **(MD) A304DSY1205** – Zainatul Sirti – Universitas Pembangunan Nasional Veteran Jakarta
 
-# ENDPOINTS
+# API Documentation
 
-| Method | Endpoint      |
-| ------ | ------------- |
-| GET    | /Users        |
-| POST   | /Signup       |
-| POST   | /Signin       |
-| DELETE | /Signout      |
-| PATCH  | /Profile      |
-| POST   | /upload       |
-| GET    | /History      |
-| GET    | /History/{id} |
+This document provides information on how to use the API endpoints and their functionalities.
 
-<hr>
+## Endpoints
 
-## <b>GET /Users </b>
+### POST /signup
 
-Mendapatkan semua data user
+Create a new user account.
 
-Request body: tidak ada
+#### Request
 
-Response :
-Array user objects
+- Method: POST
+- Path: /signup
+- Body Parameters:
+```json
+  {
+    "name": "John Doe",
+    "email": "johndoe@example.com",
+    "phone": "1234567890",
+    "password": "password123"
+  }
+```
 
-<hr>
+#### Response
 
-## <b>POST /Signup </b>
+- Success (HTTP 200):
+  - success (boolean): `true`
+  - msg (string): "Berhasil SignUp, silakan SignIn"
 
-Melakukan pendaftaran ke aplikasi
+- Failure (HTTP 400):
+  - success (boolean): `false`
+  - msg (string): "Email sudah terdaftar"
 
-Request body:
+### POST /signin
 
+Authenticate and sign in a user.
+
+#### Request
+
+- Method: POST
+- Path: /signin
+- Body Parameters:
 ```json
 {
-  "name": "nama_user",
-  "email": "email_user",
-  "phone": "nomor_telepon_user",
-  "password": "password_user"
+  "email": "johndoe@example.com",
+  "password": "password123"
 }
 ```
 
-Response jika sign-up berhasil:
+#### Response
 
+- Success (HTTP 200):
+  - success (boolean): `true`
+  - msg (string): "Berhasil Sign In"
+  - data (object):
+    - uid (string): User's unique ID.
+    - email (string): User's email address.
+
+- Failure (HTTP 404):
+  - success (boolean): `false`
+  - msg (string): "Error melakukan Sign In"
+
+### POST /reset-password
+
+Send a password reset email to the user.
+
+#### Request
+
+- Method: POST
+- Path: /reset-password
+- Body Parameters:
+```json
+{
+  "email": "johndoe@example.com"
+}
+
+```
+
+#### Response
+
+- Success (HTTP 200):
+  - msg (string): "Link Reset Password Telah Dikirim Ke Email"
+
+- Failure (HTTP 200):
+  - msg (string): "Error melakukan reset password"
+
+### POST /Signout
+
+Sign out the currently authenticated user.
+
+#### Request
+
+- Method: POST
+- Path: /Signout
+
+#### Response
+
+- Success (HTTP 200):
+  - msg (string): "Sign out Berhasil"
+
+- Failure (HTTP 500):
+  - msg (string): "Gagal Melakukan Sign Out"
+
+### POST /predict
+
+Upload an image file for prediction.
+
+#### Request
+
+- Method: POST
+- Path: /predict
+- Body Parameters:
+  - image (file): Image file to be uploaded.
+
+#### Response
+
+- Success (HTTP 200):
+  - status (string): "Success"
+  - message (string): "Profile picture berhasil ditambahkan"
+  - fileName (string): Name of the uploaded file.
+  - url (string): Public URL of the uploaded file.
+  - file (file): JSON file containing additional information.
+
+### POST /upload-profile-picture
+
+Upload a profile picture image file.
+
+#### Request
+
+- Method: POST
+- Path: /upload-profile-picture
+- Body Parameters:
+  - image (file): Image file to be uploaded.
+
+#### Response
+
+- Success (HTTP 200):
+  - status (string): "Success"
+  - message (string): "Profile picture berhasil ditambahkan"
+  - fileName (string): Name of the uploaded file.
+  - url (string): Public URL of the uploaded file.
+  - file (file): JSON file containing additional information.
+
+### POST /upload/:uid
+
+Upload a profile picture image file for a specific user.
+
+#### Request
+
+- Method: POST
+- Path: /upload/:uid
+- Body Parameters:
+  - image (file): Image file to be uploaded.
+- Route Parameters:
+  - uid (string): User's unique ID.
+
+#### Response
+
+- Success (HTTP 200):
+  - status (string): "Success"
+  - message (string): "Profile picture berhasil ditambahkan"
+  - fileName (string): Name of the uploaded file.
+  - url (string): Public URL of the uploaded file.
+  - file (file): JSON file containing additional information.
+
+### POST /post-article
+
+Create and posting new artikel
+
+#### Request
+- Method: POST
+- Path: /article
+- Body Parameters:
+```json
+{
+  "imageURL": "https://example.com/image.jpg",
+  "title": "Judul Artikel",
+  "description": "Deskripsi artikel",
+  "createdBy": "John Doe",
+  "content": "Isi artikel...",
+  "sourceURL": "https://example.com/article"
+}
+```
+
+#### Response
+- Success (HTTP 200):
+  - success (boolean): true
+  - msg (string): "Berhasil"
+- Failure (HTTP 400):
+  - success (boolean): false
+  - msg (string): "Field berikut harus diisi: [field1, field2, ...]"
+- Error (HTTP 500):
+  - success (boolean): false
+  - msg (string): "Terjadi kesalahan, tunggu beberapa saat"
+
+### GET /article
+- Method: GET
+- Path: /article
+- Body Parameters: none
+
+#### Response
+
+- Success (HTTP 200):
+  - success (boolean): true
+  - msg (string): "Berhasil"
+- Error (HTTP 500):
+  - success (boolean): false
+  - log : Error getting articles
+  - msg (string): "Terjadi kesalahan, tunggu beberapa saat"
+
+#### Example JSON Data Response
 ```json
 {
   "success": true,
-  "msg": "Berhasil SignUp, silakan SignIn"
+  "msg": "Berhasil",
+  "data": [
+    {
+      "id": "xdetect-article-abc",
+      "imageURL": "https://example.com/image.jpg",
+      "title": "Judul Artikel",
+      "description": "Deskripsi artikel",
+      "createdBy": "John Doe",
+      "createdAt": "June 10, 2023 10:00 AM",
+      "content": "Isi artikel...",
+      "sourceURL": "https://example.com/article"
+    },
+    {
+      "id": "xdetect-article-def",
+      "imageURL": "https://example.com/image2.jpg",
+      "title": "Judul Artikel 2",
+      "description": "Deskripsi artikel 2",
+      "createdBy": "Jane Smith",
+      "createdAt": "June 9, 2023 2:30 PM",
+      "content": "Isi artikel 2...",
+      "sourceURL": "https://example.com/article2"
+    }
+  ]
 }
 ```
 
-Response jika username sudah digunakan:
+### GET /article/:uid
+- Method: POST
+- Path: /article/:uid
+- Route Parameters:
+  - uid (string): Articles's unique ID.
 
-```json
-{
-  "success": false,
-  "msg": "Username sudah digunakan"
-}
-```
+#### Response
 
-## <b>POST /Signin </b>
+- Success (HTTP 200):
+  - success (boolean): true
+  - msg (string): "Berhasil"
+  - data (object): Data artikel yang ditemukan
+- Not Found (HTTP 404):
+  - success (boolean): false
+  - msg (string): "Artikel tidak ditemukan"
+- Error (HTTP 500):
+  - success (boolean): false
+  - msg (string): "Terjadi kesalahan, tunggu beberapa saat"
 
-Dilakukan untuk login ke aplikasi dan melakukan autentikasi
-
-Request body:
-
-```json
-{
-  "name": "nama_user",
-  "password": "password_user"
-}
-```
-
-Response jika sign-in berhasil:
-
+#### Example JSON Data Response
 ```json
 {
   "success": true,
-  "msg": "Berhasil Login",
+  "msg": "Berhasil",
   "data": {
-    "userId": "id_user",
-    "name": "nama_user",
-    "phone": "nomor_telepon_user",
-    "email": "email_user",
-    "image_url": "url_gambar",
-    "accessToken": "access_token"
+    "id": "xdetect-article-abc",
+    "imageURL": "https://example.com/image.jpg",
+    "title": "Judul Artikel",
+    "description": "Deskripsi artikel",
+    "createdBy": "John Doe",
+    "createdAt": "June 10, 2023 10:00 AM",
+    "content": "Isi artikel...",
+    "sourceURL": "https://example.com/article"
   }
 }
 ```
 
-Response jika password salah:
-
-```json
-{
-  "success": false,
-  "msg": "Password Anda Salah"
-}
-```
-
-Response jika username tidak ditemukan:
-
-```json
-{
-  "success": false,
-  "msg": "Username Tidak Ditemukan"
-}
-```
-
-<hr>
-
-## <b>DELETE /Signout <b>
-
-User melakukan logout dari aplikasi
-
-Request Body: Tidak memerlukan request body.
-
-Response jika sign-out berhasil:
-
-```json
-{
-  "msg": "Sign out berhasil"
-}
-```
-
-## <b>PATCH /Profile <b>
-
-Untuk melakukan perubahan terhadap profile akun pengguna aplikasi
-
-Request Body:
-
-```json
-{
-  "name": "nama_user",
-  "email": "email_user",
-  "phone": "nomor_telepon_user",
-  "password": "password_user"
-}
-```
-
-Response jika profile berhasil diupdate:
-
-```json
-{
-  "success": true,
-  "msg": "Profile Berhasil Diupdate"
-}
-```
-
-Response jika access token tidak ada:
-
-```json
-{
-  "msg": "Access token tidak ada"
-}
-```
-
-Response jika access token tidak ada:
-
-```json
-{
-  "msg": "User tidak ditemukan"
-}
-```
-
-## <b>POST /upload <b>
-
-Untuk melakukan perubahan terhadap profile akun pengguna aplikasi
-
-Request Body: Multipart form data dengan field image yang berisi file gambar.
-
-```json
-{
-  "image": "example.jpg"
-}
-```
-
-Response jika berhasil: akan mengupload gambar dan menjalankan deteksi penyakit kemudian mengembalikan Array of history objects.
-
-Response jika tidak ada gambar yang diupload:
-
-```json
-{
-  "msg": "Tidak Ada Gambar"
-}
-```
-
-Response jika terjadi error saat mengunggah gambar:
-
-```json
-{
-  "msg": "Error uploading image: error_message"
-}
-```
-
-Response jika terjadi kesalahan menambahkan data history:
-
-```json
-{
-  "msg": "Error adding history data: error_message"
-}
-```
-
-Response jika Berhasil melakukan upload dan deteksi:
-
-```json
-{
-  "msg": "Masih Dikembangkan"
-}
-```
-
-## <b>GET /History <b>
-
-Mendapatkan semua data history deteksi berdasarkan userId
-
-Response jika terdapat data history
-
-```json
-{
-  "id": 1,
-  "id_user": 1,
-  "image_url": "https://example.com",
-  "title": "lore ipsum",
-  "response": "lorem"
-}
-```
-
-## <b>GET /History/{id} <b>
-
-Mendapatkan detail data history deteksi berdasarkan userId dan historyId
-
-Response jika terdapat data history
-
-```json
-{
-  "id": 1,
-  "id_user": 1,
-  "image_url": "https://example.com",
-  "title": "lore ipsum",
-  "response": "lorem"
-}
-```
