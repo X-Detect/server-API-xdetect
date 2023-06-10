@@ -20,14 +20,14 @@ This document provides information on how to use the API endpoints and their fun
 
 ## Endpoints
 
-### POST /Signup
+### POST /signup
 
 Create a new user account.
 
 #### Request
 
 - Method: POST
-- Path: /Signup
+- Path: /signup
 - Body Parameters:
 ```json
   {
@@ -48,14 +48,14 @@ Create a new user account.
   - success (boolean): `false`
   - msg (string): "Email sudah terdaftar"
 
-### POST /Signin
+### POST /signin
 
 Authenticate and sign in a user.
 
 #### Request
 
 - Method: POST
-- Path: /Signin
+- Path: /signin
 - Body Parameters:
 ```json
 {
@@ -77,14 +77,14 @@ Authenticate and sign in a user.
   - success (boolean): `false`
   - msg (string): "Error melakukan Sign In"
 
-### POST /Resetpassword
+### POST /reset-password
 
 Send a password reset email to the user.
 
 #### Request
 
 - Method: POST
-- Path: /Resetpassword
+- Path: /reset-password
 - Body Parameters:
 ```json
 {
@@ -118,14 +118,14 @@ Sign out the currently authenticated user.
 - Failure (HTTP 500):
   - msg (string): "Gagal Melakukan Sign Out"
 
-### POST /Predict
+### POST /predict
 
 Upload an image file for prediction.
 
 #### Request
 
 - Method: POST
-- Path: /Predict
+- Path: /predict
 - Body Parameters:
   - image (file): Image file to be uploaded.
 
@@ -179,4 +179,116 @@ Upload a profile picture image file for a specific user.
   - fileName (string): Name of the uploaded file.
   - url (string): Public URL of the uploaded file.
   - file (file): JSON file containing additional information.
+
+### POST /post-article
+
+Create and posting new artikel
+
+#### Request
+- Method: POST
+- Path: /article
+- Body Parameters:
+```json
+{
+  "imageURL": "https://example.com/image.jpg",
+  "title": "Judul Artikel",
+  "description": "Deskripsi artikel",
+  "createdBy": "John Doe",
+  "content": "Isi artikel...",
+  "sourceURL": "https://example.com/article"
+}
+```
+
+#### Response
+- Success (HTTP 200):
+  - success (boolean): true
+  - msg (string): "Berhasil"
+- Failure (HTTP 400):
+  - success (boolean): false
+  - msg (string): "Field berikut harus diisi: [field1, field2, ...]"
+- Error (HTTP 500):
+  - success (boolean): false
+  - msg (string): "Terjadi kesalahan, tunggu beberapa saat"
+
+### GET /article
+- Method: GET
+- Path: /article
+- Body Parameters: none
+
+#### Response
+
+- Success (HTTP 200):
+  - success (boolean): true
+  - msg (string): "Berhasil"
+- Error (HTTP 500):
+  - success (boolean): false
+  - log : Error getting articles
+  - msg (string): "Terjadi kesalahan, tunggu beberapa saat"
+
+#### Example JSON Data Response
+```json
+{
+  "success": true,
+  "msg": "Berhasil",
+  "data": [
+    {
+      "id": "xdetect-article-abc",
+      "imageURL": "https://example.com/image.jpg",
+      "title": "Judul Artikel",
+      "description": "Deskripsi artikel",
+      "createdBy": "John Doe",
+      "createdAt": "June 10, 2023 10:00 AM",
+      "content": "Isi artikel...",
+      "sourceURL": "https://example.com/article"
+    },
+    {
+      "id": "xdetect-article-def",
+      "imageURL": "https://example.com/image2.jpg",
+      "title": "Judul Artikel 2",
+      "description": "Deskripsi artikel 2",
+      "createdBy": "Jane Smith",
+      "createdAt": "June 9, 2023 2:30 PM",
+      "content": "Isi artikel 2...",
+      "sourceURL": "https://example.com/article2"
+    }
+  ]
+}
+```
+
+### GET /article/:uid
+- Method: POST
+- Path: /article/:uid
+- Route Parameters:
+  - uid (string): Articles's unique ID.
+
+#### Response
+
+- Success (HTTP 200):
+  - success (boolean): true
+  - msg (string): "Berhasil"
+  - data (object): Data artikel yang ditemukan
+- Not Found (HTTP 404):
+  - success (boolean): false
+  - msg (string): "Artikel tidak ditemukan"
+- Error (HTTP 500):
+  - success (boolean): false
+  - msg (string): "Terjadi kesalahan, tunggu beberapa saat"
+
+#### Example JSON Data Response
+```json
+{
+  "success": true,
+  "msg": "Berhasil",
+  "data": {
+    "id": "xdetect-article-abc",
+    "imageURL": "https://example.com/image.jpg",
+    "title": "Judul Artikel",
+    "description": "Deskripsi artikel",
+    "createdBy": "John Doe",
+    "createdAt": "June 10, 2023 10:00 AM",
+    "content": "Isi artikel...",
+    "sourceURL": "https://example.com/article"
+  }
+}
+```
 
