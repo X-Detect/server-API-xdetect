@@ -5,12 +5,11 @@ import { db, auth } from "../db-config/firebase-config.js";
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { Storage } from '@google-cloud/storage';
 import dotenv from "dotenv";
-import { format } from "util";
 dotenv.config();
 
 const storage = new Storage({
     projectId: process.env.GOOGLE_CLOUD_PROJECT,
-    keyFilename: "../db-config/serviceAccount.json",
+    keyFilename: "./db-config/serviceAccount.json",
 });
 
 // Handler signup
@@ -200,17 +199,46 @@ export const predict = async(req, res) => {
     });
 
     stream.on('finish', async () => {
-    // Dapatkan URL publik file yang diunggah
+    // Dapatkan URL public file yang diunggah
     const [url] = await fileUpload.getSignedUrl({
         action: 'read',
         expires: '01-01-2025', // Tanggal kadaluarsa URL publik
     });
+
+
+    // Lakukan Predict
+   
+    const predict = await getPredict(imageFile);
+
+
+
+    // // Save ke history di firebase
+    // try {
+    //     const docRef = db.collection('history').doc('');
+    //     const res = await docRef.set({
+    //         [id_user] : 'henuifhui',
+    //         [nama] : 'Cancer',
+    //         [maxLabel] : '60%',
+    //         [predictionAccuracy] : 'Cancer',
+    //         [saran] : 'Segera berobat',
+    //         [rekomedasi] : 'sehat',
+    //         [imgUrl] : url
+
+    //     });
+    //     res.status(200).json(res);
+    // } catch (error) {
+    //     console.log('Error melakukan sign up:', error);
+    //     res.status(400).json({success:false, msg:'Email sudah terdaftar'});
+    // }
+
+
 
     res.status(200).json({
         status: 'Success',
         message: 'Profile picture berhasil ditambahkan',
         fileName,
         url,
+        predict
         });
     });
 
@@ -218,5 +246,23 @@ export const predict = async(req, res) => {
     } catch (error) {
         console.error('Error uploading file:', error);
         res.status(500).send('Internal Server Error');
+    }
+}
+
+const getPredict = async (image) =>{
+    const formData = new FormData();
+    formData.append('image', image);
+    const url = 'https://xray-prediction-akdfifaocq-et.a.run.app/predict';
+    const options = {
+        method: 'POST',
+        body: formData,
+    };
+
+    try {
+        const res = await fetch(url, options); // Jika respons sudah dalam format JSON, Anda dapat langsung menggunakannya
+        console.log(res); // Tampilkan data JSON di konsol
+        return res;
+    } catch (err) {
+        console.log(err);
     }
 }
