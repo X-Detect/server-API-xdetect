@@ -1,4 +1,4 @@
-import {createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateEmail, updatePassword} from "firebase/auth";
+import {createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword, signOut, updateEmail, updatePassword} from "firebase/auth";
 import { doc, setDoc, getDocs, getDoc, updateDoc, serverTimestamp, collection } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { db, auth } from "../db-config/firebase-config.js";
@@ -343,4 +343,55 @@ export const getArticleByUID = async (req, res) => {
       msg: 'Terjadi kesalahan, tunggu beberapa saat',
     });
   }
+};
+
+// Handler get User
+export const getUsers = async(req, res) => {
+    try {
+        const UsersCollection = collection(db, 'users');
+        const userSnapshot = await getDocs(UsersCollection);
+        const users = [];
+    
+        userSnapshot.forEach((doc) => {
+            const usersData = doc.data();
+            users.push({ ...usersData });
+        });
+    
+        res.status(200).json({
+            success: true,
+            msg: 'Berhasil',
+            data: users,
+        });
+    } catch (error) {
+        console.log('Error getting Users:', error);
+        res.status(500).json({
+            success: false,
+            msg: 'Terjadi kesalahan, tunggu beberapa saat',
+        });
+    }
+}
+
+// Handler get User UID
+export const getUserUid = async (req, res) => {
+    const { uid } = req.params;
+    try {
+        const userDoc = doc(db, 'users', uid);
+        const docSnap = await getDoc(userDoc);
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            res.status(200).json({
+                success: true,
+                msg: 'Berhasil',
+                data: {
+                    name: data.name, email: data.email, phone: data.phone, imgUrl: data.imgUrl
+                }
+            });
+        }
+        res.status(404).json({
+            success: false,
+            msg: 'Users tidak ditemukan',
+        });
+    } catch (error) {
+        console.log('Error mendapatkan data user:', error);
+    }
 };
