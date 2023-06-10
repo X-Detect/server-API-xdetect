@@ -6,11 +6,11 @@ const router = express.Router();
 const multerStorage = multer.memoryStorage();
 const upload = multer({ storage: multerStorage });
 
-router.post('/Signup', signUp)
-router.post('/Signin', signIn)
-router.post('/Resetpassword', resetPassword)
-router.post('/Signout', signOutUser)
-router.post('/Predict', upload.single('image'), predict)
+router.post('/signup', signUp)
+router.post('/signin', signIn)
+router.post('/reset-password', resetPassword)
+router.post('/signout', signOutUser)
+router.post('/predict', upload.single('image'), predict)
 router.post('/upload-profile-picture', upload.single('image'), uploadProfilePicture);
 router.post('/upload/:uid', upload.single('image'), uploadProfilePictureWithUID);
 router.post('/article', postArticle)
