@@ -27,6 +27,7 @@ export const signUp = async(req, res) => {
             name,
             email,
             phone,
+            uid : user.uid,
             imgUrl: '',
             profilePicture: '',
         });
@@ -348,7 +349,7 @@ export const getArticleByUID = async (req, res) => {
 // Handler get User
 export const getUsers = async(req, res) => {
     try {
-        const UsersCollection = collection(db, 'users');
+        const UsersCollection = collection(db, 'users2');
         const userSnapshot = await getDocs(UsersCollection);
         const users = [];
     
@@ -375,16 +376,14 @@ export const getUsers = async(req, res) => {
 export const getUserUid = async (req, res) => {
     const { uid } = req.params;
     try {
-        const userDoc = doc(db, 'users', uid);
+        const userDoc = doc(db, 'users2', uid);
         const docSnap = await getDoc(userDoc);
         if (docSnap.exists()) {
             const data = docSnap.data();
             res.status(200).json({
                 success: true,
                 msg: 'Berhasil',
-                data: {
-                    name: data.name, email: data.email, phone: data.phone, imgUrl: data.imgUrl
-                }
+                data
             });
         }
         res.status(404).json({
