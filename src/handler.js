@@ -1,5 +1,5 @@
 import {createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateEmail, updatePassword} from "firebase/auth";
-import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, setDoc, getDocs, getDoc, updateDoc, serverTimestamp, collection } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { db, auth } from "../db-config/firebase-config.js";
 import { sendPasswordResetEmail } from 'firebase/auth';
@@ -176,10 +176,6 @@ export const signOutUser = async(req, res) => {
     }
 }
 
-// Handler /users
-
-// Handler /user/{uid}
-
 // Handler prediksi
 export const predict = async (req, res) => {
   try {
@@ -232,3 +228,118 @@ export const predict = async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 };
+
+// Handler untuk posting artikel
+export const postArticle = async (req, res) => {
+  const { imageURL, title, description, createdBy, content, sourceURL } = req.body;
+  const requiredFields = ['imageURL', 'title', 'description', 'createdBy', 'content', 'sourceURL'];
+  const missingFields = [];
+
+  requiredFields.forEach(field => {
+    if (!req.body[field]) {
+      missingFields.push(field);
+    }
+  });
+
+  if (missingFields.length > 0) {
+    return res.status(400).json({
+      success: false,
+      msg: `Field berikut harus diisi: ${missingFields.join(', ')}`,
+    });
+  }
+
+  try {
+    const articleRef = doc(db, 'db-articles', generateUniqueID());
+    await setDoc(articleRef, {
+      imageURL,
+      title,
+      description,
+      createdBy,
+      createdAt: serverTimestamp(),
+      content,
+      sourceURL,
+    });
+    res.status(200).json({
+      success: true,
+      msg: 'Berhasil',
+    });
+  } catch (error) {
+    console.log('Error posting article:', error);
+    res.status(500).json({
+      success: false,
+      msg: 'Terjadi kesalahan, tunggu beberapa saat',
+    });
+  }
+};
+
+function generateUniqueID() {
+  const prefix = 'xdetect-article-';
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let uniqueID = '';
+
+  for (let i = 0; i < 3; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    const randomCharacter = characters[randomIndex];
+    uniqueID += randomCharacter;
+  }
+
+  return prefix + uniqueID;
+}
+
+// Handler untuk mendapatkan semua data article
+export const getAllArticles = async (req, res) => {
+  try {
+    const articlesCollection = collection(db, 'db-articles');
+    const articlesSnapshot = await getDocs(articlesCollection);
+    const articles = [];
+
+    articlesSnapshot.forEach((doc) => {
+      const articleData = doc.data();
+      const createdAt = articleData.createdAt.toDate();
+      const formattedCreatedAt = createdAt.toLocaleString('en-ID', { timeZone: 'Asia/Jakarta' });
+      articles.push({ id: doc.id, ...articleData, createdAt: formattedCreatedAt });
+    });
+
+    res.status(200).json({
+      success: true,
+      msg: 'Berhasil',
+      data: articles,
+    });
+  } catch (error) {
+    console.log('Error getting articles:', error);
+    res.status(500).json({
+      success: false,
+      msg: 'Terjadi kesalahan, tunggu beberapa saat',
+    });
+  }
+};
+
+export const getArticleByUID = async (req, res) => {
+  const { uid } = req.params;
+
+  try {
+    const articleDoc = doc(db, 'db-articles', uid);
+    const docSnap = await getDoc(articleDoc);
+
+    if (docSnap.exists()) {
+      const articleData = docSnap.data();
+      res.status(200).json({
+        success: true,
+        msg: 'Berhasil',
+        data: articleData,
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        msg: 'Artikel tidak ditemukan',
+      });
+    }
+  } catch (error) {
+    console.log('Error getting article:', error);
+    res.status(500).json({
+      success: false,
+      msg: 'Terjadi kesalahan, tunggu beberapa saat',
+    });
+  }
+};
+
