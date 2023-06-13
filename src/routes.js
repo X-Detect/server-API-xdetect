@@ -12,7 +12,7 @@ router.post('/reset-password', resetPassword)
 router.post('/signout', signOutUser)
 router.post('/predict', upload.single('image'), predict)
 router.post('/upload-profile-picture', upload.single('image'), uploadProfilePicture);
-router.post('/upload/:uid', upload.single('image'), uploadProfilePictureWithUID);
+router.put('/upload/:uid', upload.single('image'), uploadProfilePictureWithUID);
 router.post('/article', postArticle)
 router.get('/article', getAllArticles)
 router.get('/article/:uid', getArticleByUID)

@@ -132,7 +132,9 @@ export const uploadProfilePictureWithUID = async (req, res) => {
   
         // Update URL gambar profil pengguna di database
         try {
+          console.log('uid',uid);
           const userDoc = doc(db, 'users2', uid);
+          
           await updateDoc(userDoc, { imgUrl: url, profilePicture: url });
           console.log('Profile picture URL updated in the database');
         } catch (error) {
