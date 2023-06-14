@@ -18,6 +18,23 @@
 
 This document provides information on how to use the API endpoints and their functionalities.
 
+## Recap Endpoint Routes
+| Route                           | HTTP Method | Description                                  |
+|---------------------------------|-------------|----------------------------------------------|
+| /signup                         | POST        | Sign up a new user                           |
+| /signin                         | POST        | Sign in a user                               |
+| /signout                        | POST        | Sign out a user                              |
+| /reset-password                 | POST        | Reset user's password                         |
+| /users                          | GET         | Get all users                                |
+| /users/:uid                     | GET         | Get user by UID                              |
+| /upload-profile-picture         | POST        | Upload a profile picture for a user           |
+| /upload/:uid                    | PUT         | Upload a profile picture with UID             |
+| /predict                        | POST        | Perform a prediction using an uploaded image  |
+| /article                        | POST        | Post a new article                            |
+| /article                        | GET         | Get all articles                             |
+| /article/:uid                   | GET         | Get an article by UID                         |
+
+
 ## Endpoints
 
 ### POST /signup
@@ -168,6 +185,7 @@ Upload a profile picture image file for a specific user.
 - Path: /upload/:uid
 - Body Parameters:
   - image (file): Image file to be uploaded.
+  - uid (string): User's unique ID.
 - Route Parameters:
   - uid (string): User's unique ID.
 

@@ -328,10 +328,16 @@ export const getArticleByUID = async (req, res) => {
 
     if (docSnap.exists()) {
       const articleData = docSnap.data();
+      const createdAt = articleData.createdAt.toDate();
+      const formattedCreatedAt = createdAt.toLocaleString('en-ID', { timeZone: 'Asia/Jakarta' });
+      
       res.status(200).json({
         success: true,
         msg: 'Berhasil',
-        data: articleData,
+        data: {
+          ...articleData,
+          createdAt: formattedCreatedAt
+        },
       });
     } else {
       res.status(404).json({
@@ -347,6 +353,7 @@ export const getArticleByUID = async (req, res) => {
     });
   }
 };
+
 
 // Handler get User
 export const getUsers = async(req, res) => {
