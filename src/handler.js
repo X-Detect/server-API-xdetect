@@ -301,7 +301,7 @@ export const getAllArticles = async (req, res) => {
     articlesSnapshot.forEach((doc) => {
       const articleData = doc.data();
       const createdAt = articleData.createdAt.toDate();
-      const formattedCreatedAt = createdAt.toLocaleString('en-ID', { timeZone: 'Asia/Jakarta' });
+      const formattedCreatedAt = createdAt.toLocaleDateString('en-ID', { timeZone: 'Asia/Jakarta' });
       articles.push({ id: doc.id, ...articleData, createdAt: formattedCreatedAt });
     });
 
@@ -329,7 +329,7 @@ export const getArticleByUID = async (req, res) => {
     if (docSnap.exists()) {
       const articleData = docSnap.data();
       const createdAt = articleData.createdAt.toDate();
-      const formattedCreatedAt = createdAt.toLocaleString('en-ID', { timeZone: 'Asia/Jakarta' });
+      const formattedCreatedAt = createdAt.toLocaleDateString('en-ID', { timeZone: 'Asia/Jakarta' });
       
       res.status(200).json({
         success: true,
