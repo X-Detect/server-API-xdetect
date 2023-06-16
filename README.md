@@ -44,15 +44,32 @@ Please go to Google Cloud Console and create a service account with permissions 
 ### Create folder called db-config
 This folder is used to store 2 file including firebase-config.js and serviceAccount.json. Use serviceAccount.json from Google Cloud Project
 ```
-- Change configuration with your database (this app using Firebase) : 
-    API_KEY=<YOUR_PRIVATE_KEY>
-    AUTH_DOMAIN=<YOUR_PRIVATE_KEY>
-    PROJECT_ID=<YOUR_PRIVATE_KEY>
-    STORAGE_BUCKET=<YOUR_PRIVATE_KEY>
-    MESSAGING_SENDER_ID=<YOUR_PRIVATE_KEY>
-    APP_ID=<YOUR_PRIVATE_KEY>
-    GOOGLE_CLOUD_PROJECT=<YOUR_CLOUD_PROJECT>
-    GOOGLE_APPLICATION_CREDENTIALS=<YOUR_PATH_TO_SERVICE_ACCOUNT>
+- Create firebase-config.js :
+
+import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const firebaseConfig = {
+    apiKey: "",
+    authDomain: "",
+    projectId: "",
+    storageBucket: "",
+    messagingSenderId: "",
+    appId: ""
+  };
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+export { auth, db };
+
+- locate in line 4 file handler.js
+
 ```
 ### Configure Node Module
 ```
