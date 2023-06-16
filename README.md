@@ -18,6 +18,51 @@
 
 This document provides information on how to use the API endpoints and their functionalities.
 
+# Setup Project
+To run this project, install it locally using npm on your pc
+```
+# clone repository
+$ git clone https://github.com/X-Detect/server-API-xdetect.git
+
+# change directory to server-API-xdetect
+$ cd server-API-xdetect
+```
+Please go to Google Cloud Console and create a service account with permissions for both Storage Object Admin and Storage Object Viewer
+
+### Configure your .env
+```
+- Change configuration with your database (this app using Firebase) : 
+    API_KEY=<YOUR_PRIVATE_KEY>
+    AUTH_DOMAIN=<YOUR_PRIVATE_KEY>
+    PROJECT_ID=<YOUR_PRIVATE_KEY>
+    STORAGE_BUCKET=<YOUR_PRIVATE_KEY>
+    MESSAGING_SENDER_ID=<YOUR_PRIVATE_KEY>
+    APP_ID=<YOUR_PRIVATE_KEY>
+    GOOGLE_CLOUD_PROJECT=<YOUR_CLOUD_PROJECT>
+    GOOGLE_APPLICATION_CREDENTIALS=<YOUR_PATH_TO_SERVICE_ACCOUNT>
+```
+### Create folder called db-config
+This folder is used to store 2 file including firebase-config.js and serviceAccount.json. Use serviceAccount.json from Google Cloud Project
+```
+- Change configuration with your database (this app using Firebase) : 
+    API_KEY=<YOUR_PRIVATE_KEY>
+    AUTH_DOMAIN=<YOUR_PRIVATE_KEY>
+    PROJECT_ID=<YOUR_PRIVATE_KEY>
+    STORAGE_BUCKET=<YOUR_PRIVATE_KEY>
+    MESSAGING_SENDER_ID=<YOUR_PRIVATE_KEY>
+    APP_ID=<YOUR_PRIVATE_KEY>
+    GOOGLE_CLOUD_PROJECT=<YOUR_CLOUD_PROJECT>
+    GOOGLE_APPLICATION_CREDENTIALS=<YOUR_PATH_TO_SERVICE_ACCOUNT>
+```
+### Configure Node Module
+```
+# in server-API-xdetect
+
+# install all depencencies using `npm install`
+
+# run the backend using `npm start` or if you want to use dev environment you can hit `npm run dev`
+```
+
 ## Recap Endpoint Routes
 | Route                           | HTTP Method | Description                                  |
 |---------------------------------|-------------|----------------------------------------------|
